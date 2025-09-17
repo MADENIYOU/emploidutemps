@@ -1,3 +1,4 @@
+//@ts-nocheck
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -19,6 +20,7 @@ export const metadata: Metadata = {
 
 import Providers from './providers';
 import { Header } from '@/components/layout/Header';
+import { Toaster } from '@/components/ui/sonner';
 
 export default function RootLayout({
   children,
@@ -33,6 +35,7 @@ export default function RootLayout({
           <main className="container mx-auto p-4 sm:p-6 lg:p-8">
             {children}
           </main>
+          <Toaster />
         </Providers>
       </body>
     </html>

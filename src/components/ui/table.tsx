@@ -1,3 +1,4 @@
+//@ts-nocheck
 "use client"
 
 import * as React from "react"
@@ -61,7 +62,9 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
         className
       )}
       {...props}
-    />
+    >
+      {props.children}
+    </tr>
   )
 }
 

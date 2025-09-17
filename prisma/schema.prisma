@@ -6,23 +6,74 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
+// Model for authenticating users and their roles
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  firstName String?
-  lastName  String?
-  subjects  String[]
-  password  String
-  role      Role     @default(TEACHER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String    @id @default(cuid())
+  email         String    @unique
+  firstName     String?
+  lastName      String?
+  password      String
+  role          Role      @default(TEACHER)
+  subjects      Subject[] @relation("TeacherSubjects")
+  managedLevels Json @default("[]") // New field for levels managed by the user, stored as JSON string for SQLite compatibility
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 enum Role {
   PRINCIPAL
   TEACHER
+}
+
+// Model for subjects that can be taught
+model Subject {
+  id      String   @id @default(cuid())
+  name    String   @unique
+  users   User[]   @relation("TeacherSubjects")
+  courses Course[] // A subject can be part of many courses (e.g., Math in 6e, Math in 5e)
+  dayOff  DayOfWeek? // New field, optional
+}
+
+// Represents a subject being taught at a certain level for a certain number of hours.
+// This is the "template" for a level.
+model Course {
+  id           String  @id @default(cuid())
+  level        Level // The class level
+  subject      Subject @relation(fields: [subjectId], references: [id])
+  subjectId    String
+  hoursPerWeek Float
+
+  @@unique([level, subjectId]) // Can't have the same subject for the same level twice
+}
+
+// This is the new model for individual classes like "6e A", "5e B".
+model Class {
+  id      String @id @default(cuid())
+  level   Level
+  section String // "A", "B", "C"
+
+  @@unique([level, section])
+}
+
+// Enum for the different class levels
+enum Level {
+  SIXIEME
+  CINQUIEME
+  QUATRIEME
+  TROISIEME
+}
+
+// Enum for days of the week
+enum DayOfWeek {
+  LUNDI
+  MARDI
+  MERCREDI
+  JEUDI
+  VENDREDI
+  SAMEDI
+  DIMANCHE
 }
